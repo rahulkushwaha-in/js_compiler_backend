@@ -21,24 +21,27 @@ app.post('/nodejs', (req, res) => {
 
   try {
     const vm = new VM({
-      timeout: 4000, // 3 second timeout
+      timeout: 5000, // 5 second timeout
       sandbox: {
         console: {
           log: (...args) => {
-            logs.push(args.map(arg => {
+            const formattedArgs = args.map(arg => {
               if (Array.isArray(arg)) {
                 return `[${arg.join(', ')}]`;
               }
               return typeof arg === 'object' ? 
-                JSON.stringify(arg, null, 2) : 
+                JSON.stringify(arg) : 
                 String(arg);
-            }).join(' ') + '\n'); // Add newline after each log
+            }).join(' ');
+            
+            // Only push the formatted string without extra newline
+            logs.push(formattedArgs);
           },
           error: (...args) => {
-            logs.push('Error: ' + args.join(' ') + '\n');
+            logs.push('Error: ' + args.join(' '));
           },
           warn: (...args) => {
-            logs.push('Warning: ' + args.join(' ') + '\n');
+            logs.push('Warning: ' + args.join(' '));
           }
         }
       }
@@ -48,6 +51,7 @@ app.post('/nodejs', (req, res) => {
     
     const executionTime = Math.round(performance.now() - startTime);
     res.json({
+      // Join logs with single newline
       result: logs.join('\n'),
       error: null,
       executionTime
