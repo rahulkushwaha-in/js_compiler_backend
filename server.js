@@ -25,15 +25,20 @@ app.post('/nodejs', (req, res) => {
       sandbox: {
         console: {
           log: (...args) => {
-            logs.push(args.map(arg => 
-              typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-            ).join(' '));
+            logs.push(args.map(arg => {
+              if (Array.isArray(arg)) {
+                return `[${arg.join(', ')}]`;
+              }
+              return typeof arg === 'object' ? 
+                JSON.stringify(arg, null, 2) : 
+                String(arg);
+            }).join(' ') + '\n'); // Add newline after each log
           },
           error: (...args) => {
-            logs.push('Error: ' + args.join(' '));
+            logs.push('Error: ' + args.join(' ') + '\n');
           },
           warn: (...args) => {
-            logs.push('Warning: ' + args.join(' '));
+            logs.push('Warning: ' + args.join(' ') + '\n');
           }
         }
       }
